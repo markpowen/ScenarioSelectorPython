@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ScenarioSelector.ScenarioSelector import ScenarioSelector
+from scenarioselector.scenario_selector import ScenarioSelector
+from scenarioselector.scatter_plot import ScatterPlot
 
-__all__ = ['ScenarioSelector']
+__all__ = ['ScenarioSelector', 'ScatterPlot']

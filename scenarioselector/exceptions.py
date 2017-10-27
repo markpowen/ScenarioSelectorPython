@@ -16,14 +16,23 @@ limitations under the License.
 
 __all__ = ['DegenerateLinearProgramError', 'OptimizationIncompleteError']
 
+
 class ScenarioSelectorError(Exception):
     """Base class for exceptions in this module."""
     pass
 
+
 class DegenerateLinearProgramError(ScenarioSelectorError):
-    """Target means do not lie within the convex hull of the rows of data."""
-    pass
+    """Target does not lie within the convex hull of the observations."""
+
+    def __init__(self):
+        super().__init__("Target does not lie within the convex hull " +
+                         "of the observations.")
+
 
 class OptimizationIncompleteError(ScenarioSelectorError):
     """Optimization incomplete."""
-    pass
+
+    def __init__(self, max_pivots):
+        super().__init__("Exceeded maximum of " + str(max_pivots) +
+                         " pivot operations")
