@@ -46,9 +46,7 @@ class ScatterPlot:
         else:
             self.annotate = annotate
 
-    def plot(self, lagrange_multiplier=None, fig_num=1):
-        if lagrange_multiplier is None:
-            lagrange_multiplier = np.zeros(self.dimensions)
+    def plot(self, lagrange_multiplier=(0, 0), fig_num=1):
         fig = plt.figure(fig_num, figsize=(7, 7))
         ax = fig.add_subplot(111)
         ax.set_xlim(self.xlims)
@@ -65,12 +63,18 @@ class ScatterPlot:
             ax.annotate(i, (self.data[i, 0], self.data[i, 1]))
 
         # Dividing line
-        xdata = np.array(self.xlims)
-        ydata = (1 - lagrange_multiplier[0] * (xdata - self.means[0])
-                 ) / lagrange_multiplier[1] + self.means[1]
-        ax.plot(xdata, ydata, lw=2, color='blue')
-        ydata = np.array(self.ylims)
-        xdata = (1 - lagrange_multiplier[1] * (ydata - self.means[1])
-                 ) / lagrange_multiplier[0] + self.means[0]
-        ax.plot(xdata, ydata, lw=2, color='blue')
+        with np.errstate(divide='raise', invalid='raise'):
+            try:
+                xdata = np.array(self.xlims)
+                ydata = (1 - lagrange_multiplier[0] * (xdata -
+                                                       self.means[0]))
+                ydata = ydata * lagrange_multiplier[1] + self.means[1]
+                ax.plot(xdata, ydata, lw=2, color='blue')
+                ydata = np.array(self.ylims)
+                xdata = (1 - lagrange_multiplier[1] * (ydata -
+                                                       self.means[1]))
+                xdata = xdata / lagrange_multiplier[0] + self.means[0]
+                ax.plot(xdata, ydata, lw=2, color='blue')
+            except FloatingPointError:
+                pass
         plt.show()
