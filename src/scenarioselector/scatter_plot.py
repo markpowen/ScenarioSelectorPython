@@ -68,7 +68,7 @@ class ScatterPlot:
                 xdata = np.array(self.xlims)
                 ydata = (1 - lagrange_multiplier[0] * (xdata -
                                                        self.means[0]))
-                ydata = ydata * lagrange_multiplier[1] + self.means[1]
+                ydata = ydata / lagrange_multiplier[1] + self.means[1]
                 ax.plot(xdata, ydata, lw=2, color='blue')
                 ydata = np.array(self.ylims)
                 xdata = (1 - lagrange_multiplier[1] * (ydata -
