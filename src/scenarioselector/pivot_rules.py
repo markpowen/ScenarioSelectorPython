@@ -15,12 +15,12 @@ limitations under the License.
 """
 
 from scenarioselector.pivot_dimensions import DantzigTwoPhase
-from scenarioselector.pivot_trials import trials_chooser_barrodale_roberts
+from scenarioselector.pivot_trials import barrodale_roberts
 
-__all__ = ['PivotGenerator', 'PivotGeneratorSlowedDown']
+__all__ = ['PivotRule', 'PivotRuleSlowed']
 
 
-class PivotGenerator:
+class PivotRule:
     """Returns the optimal pivot element from the supplied dimensions. The
     variable entering the basis corresponds to the integer
     self.independent_trials[pivot_dimension]. The variable leaving the basis
@@ -29,17 +29,17 @@ class PivotGenerator:
     def __init__(
             self,
             dimensions_generator=DantzigTwoPhase,
-            trials_chooser=trials_chooser_barrodale_roberts):
+            pivot_trials=barrodale_roberts):
         self.dimensions_generator = dimensions_generator
-        self.trials_chooser = trials_chooser
+        self.pivot_trials = pivot_trials
 
     def __call__(self, selector):
         dimensions_generator = self.dimensions_generator()
         for i, dimensions in dimensions_generator(selector):
-            yield (i, *self.trials_chooser(selector, dimensions))
+            yield (i, *self.pivot_trials(selector, dimensions))
 
 
-class PivotGeneratorSlowedDown(PivotGenerator):
+class PivotRuleSlowed(PivotRule):
 
     def __call__(self, selector):
         i = 0

@@ -15,6 +15,6 @@ limitations under the License.
 """
 
 from scenarioselector.scenario_selector import ScenarioSelector
-from scenarioselector.scatter_plot import ScatterPlot
+from scenarioselector.graphics import ScatterPlot
 
 __all__ = ['ScenarioSelector', 'ScatterPlot']

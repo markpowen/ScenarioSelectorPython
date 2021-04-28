@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from scenarioselector.exceptions import (OptimizationIncompleteError,
-                                            DegenerateLinearProgramError)
+from scenarioselector.exceptions import (OptimizationIncompleteError, 
+                                         DegenerateLinearProgramError)
 import numpy as np
 
 __all__ = ['Dantzig', 'DantzigTwoPhase',

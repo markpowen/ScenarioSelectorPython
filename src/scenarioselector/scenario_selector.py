@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from scenarioselector.pivot_generators import PivotGenerator
+from scenarioselector.pivot_rules import PivotRule
 import pandas as pd
 import numpy as np
 
@@ -35,14 +35,14 @@ class ScenarioSelector:
     the property reduced_weights. See also the related property probabilities
     and the boolean array selected."""
 
-    def __init__(self, data, means=0, sums=0, weights=1):
+    def __init__(self, data, mean=0, sum=0, weights=1):
         """Sets up the initial simplex tableau for the linear program.
 
         Keyword arguments:
         data -- a dataframe or matrix whose columns represent variables, and
                 whose rows represent 'observations' or 'weighted scenarios';
-        means -- target means for each variable/column of the data;
-        sums  -- target sums  for each variable/column of the data;
+        mean -- target mean for each variable/column of the data;
+        sum  -- target sum  for each variable/column of the data;
         weights -- weights for each observation/row of the data.
         """
         try:
@@ -51,12 +51,12 @@ class ScenarioSelector:
         except ValueError:
             raise Exception("data must be a dataframe or matrix.")
         try:
-            means = np.broadcast_to(means, self.dimensions)
+            mean = np.broadcast_to(mean, self.dimensions)
         except ValueError:
             raise Exception("Length of means must match the number of "
                             "variables (column dimension of data).")
         try:
-            sums = np.broadcast_to(sums, self.dimensions)
+            sum = np.broadcast_to(sum, self.dimensions)
         except ValueError:
             raise Exception("Length of sums must match the number of "
                             "variables (column dimension of data).")
@@ -71,13 +71,13 @@ class ScenarioSelector:
         self.multipliers_mask = np.ones(self.dimensions, dtype=bool)
         # All scenarios are selected initially.
         self.selected = np.ones(self.trials, dtype=bool)
-        adjusted_data = data - means
+        adjusted_data = data - mean
         self.tableau_array = np.block(
             [
                 [-np.identity(self.dimensions),
                  np.zeros((self.dimensions, 1))],
                 [adjusted_data, np.ones((self.trials, 1))],
-                [self.weights @ adjusted_data - sums, self.weights.sum()]])
+                [self.weights @ adjusted_data - sum, self.weights.sum()]])
 
 # %% Properties
 
@@ -198,21 +198,21 @@ class ScenarioSelector:
             self.feasible_solution > 0,
             self.selected)]).fix_feasible_solution()
 
-    def optimize(self, callback=None, pivot_generator=None):
+    def optimize(self, callback=None, pivot_rule=None):
         """Solves the linear program using the simplex method.
 
         Keyword arguments:
         callback -- externally monitor optimisation progress;
         pivot_generator -- pivot rule implemented as a python generator.
         """
-        if pivot_generator is None:
-            pivot_generator = PivotGenerator()
+        if pivot_rule is None:
+            pivot_rule = PivotRule()
         if callback is None:
             def callback(selector, i, element):
                 return None
         with np.errstate(divide='ignore', invalid='ignore'):
             callback(self, 0, (None, None))
-            for self.pivot_count, element, trials in pivot_generator(self):
+            for self.pivot_count, element, trials in pivot_rule(self):
                 self.pivot(element).flip_trials(trials).fix_feasible_solution()
                 callback(self, self.pivot_count, element)
             return self  # Optimisation complete
