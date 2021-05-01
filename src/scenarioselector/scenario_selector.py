@@ -35,49 +35,52 @@ class ScenarioSelector:
     the property reduced_weights. See also the related property probabilities
     and the boolean array selected."""
 
-    def __init__(self, data, mean=0, sum=0, weights=1):
+    def __init__(self, data, weights=1, means=0, sums=0):
         """Sets up the initial simplex tableau for the linear program.
 
         Keyword arguments:
         data -- a dataframe or matrix whose columns represent variables, and
                 whose rows represent 'observations' or 'weighted scenarios';
-        mean -- target mean for each variable/column of the data;
-        sum  -- target sum  for each variable/column of the data;
         weights -- weights for each observation/row of the data.
+        means -- target means for each variable/column of the data;
+        sums  -- target sums  for each variable/column of the data;
         """
         try:
             data = np.asarray(data)
             self.trials, self.dimensions = data.shape
         except ValueError:
-            raise Exception("data must be a dataframe or matrix.")
-        try:
-            mean = np.broadcast_to(mean, self.dimensions)
-        except ValueError:
-            raise Exception("Length of means must match the number of "
-                            "variables (column dimension of data).")
-        try:
-            sum = np.broadcast_to(sum, self.dimensions)
-        except ValueError:
-            raise Exception("Length of sums must match the number of "
-                            "variables (column dimension of data).")
+            raise ValueError("data must be a dataframe or matrix.")
         try:
             self.weights = np.broadcast_to(weights, self.trials)
         except ValueError:
-            raise Exception("Length of weights must match the number of "
-                            "observations (row dimension of data).")
+            raise ValueError("Length of weights must match the number of "
+                             "observations (row dimension of data).")
+        if means and sums:
+            raise ValueError("You may specify either means or sums, "
+                             "but not both.")
+        try:
+            means = np.broadcast_to(means, self.dimensions)
+        except ValueError:
+            raise ValueError("Length of means must match the number of "
+                             "variables (column dimension of data).")
+        try:
+            sums = np.broadcast_to(sums, self.dimensions)
+        except ValueError:
+            raise ValueError("Length of sums must match the number of "
+                             "variables (column dimension of data).")
         self.pivot_count = 0
         self.independent_trials = np.arange(-self.dimensions, 0)
         self.trials_mask = np.zeros(self.dimensions, dtype=bool)
         self.multipliers_mask = np.ones(self.dimensions, dtype=bool)
         # All scenarios are selected initially.
         self.selected = np.ones(self.trials, dtype=bool)
-        adjusted_data = data - mean
+        adjusted_data = data - means
         self.tableau_array = np.block(
             [
                 [-np.identity(self.dimensions),
                  np.zeros((self.dimensions, 1))],
                 [adjusted_data, np.ones((self.trials, 1))],
-                [self.weights @ adjusted_data - sum, self.weights.sum()]])
+                [self.weights @ adjusted_data - sums, self.weights.sum()]])
 
 # %% Properties
 
@@ -145,8 +148,8 @@ class ScenarioSelector:
 
     @property
     def reduced_weights(self):
-        """ReducedWeights returns an array of length self.trials
-        such that reduced_weights @ adjusted_data[:, dimension] = 0.
+        """Returns an array of length self.trials such that
+        reduced_weights @ adjusted_data[:, dimension] = 0.
         Selected,   Dependent:          reduced_weights = weights;
         Deselected, Dependent:          reduced_weights = 0.0;
         Independent, post-opt:     0 <= reduced_weights <= weights.
