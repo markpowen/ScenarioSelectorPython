@@ -18,10 +18,10 @@ from scenarioselector.exceptions import DegenerateLinearProgramError
 
 import numpy as np
 
-__all__ = ['pivot_trials', 'barrodale_roberts']
+__all__ = ['pivot_scenarios', 'barrodale_roberts']
 
 
-def pivot_trials(selector, dimensions):
+def pivot_scenarios(selector, dimensions):
     ratios = (selector.tableau_array[selector.dimensions:-1, dimensions] /
               np.outer(selector.feasible_solution, selector.costs[dimensions]))
     ratios[selector.independent_trials[selector.trials_mask]] = np.nan

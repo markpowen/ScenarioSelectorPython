@@ -25,7 +25,7 @@ class ScatterPlot:
     def __init__(
             self,
             data,
-            mean=0,
+            means=0,
             annotate=None,
             lagrange_multiplier=None,
             fig_num=1,
@@ -35,7 +35,7 @@ class ScatterPlot:
         self.trials, self.dimensions = self.data.shape
         if self.dimensions != 2:
             raise Exception("Scatter plot data must have two columns")
-        self.mean = np.broadcast_to(mean, self.dimensions)
+        self.means = np.broadcast_to(means, self.dimensions)
         if xlim is None:
             self.xlim = (np.min(self.data[:, 0]), np.max(self.data[:, 0]))
         else:
@@ -55,7 +55,7 @@ class ScatterPlot:
 
         scatter_plot = ax.scatter(self.data[:, 0], self.data[:, 1], s=20,
                                   marker='o')
-        target = ax.scatter(self.mean[0], self.mean[1], s=40, marker='x')
+        target = ax.scatter(self.means[0], self.means[1], s=40, marker='x')
         line1, = ax.plot([], [], lw=2, color='blue')
         line2, = ax.plot([], [], lw=2, color='blue')
         self.components = [scatter_plot, target, line1, line2]
@@ -66,23 +66,23 @@ class ScatterPlot:
         if multiplier is None:
             multiplier = (0, 0)
         scatter_plot = self.components[0]
-        selected = 1.0 - np.dot(self.data - self.mean, multiplier) > - 1.0e-10
+        selected = 1.0 - np.dot(self.data - self.means, multiplier) > - 1.0e-10
         scatter_plot.set_sizes(selected * 18 + 2)
         line1 = self.components[2]
         line2 = self.components[3]
         with np.errstate(divide='raise', invalid='raise'):
             try:
                 xdata = np.array(self.xlim)
-                ydata = (1 - multiplier[0] * (xdata - self.mean[0]))
-                ydata = ydata / multiplier[1] + self.mean[1]
+                ydata = (1 - multiplier[0] * (xdata - self.means[0]))
+                ydata = ydata / multiplier[1] + self.means[1]
             except FloatingPointError:
                 xdata = []
                 ydata = []
             line1.set_data(xdata, ydata)
             try:
                 ydata = np.array(self.ylim)
-                xdata = (1 - multiplier[1] * (ydata - self.mean[1]))
-                xdata = xdata / multiplier[0] + self.mean[0]
+                xdata = (1 - multiplier[1] * (ydata - self.means[1]))
+                xdata = xdata / multiplier[0] + self.means[0]
             except FloatingPointError:
                 xdata = []
                 ydata = []
@@ -101,7 +101,7 @@ class FanChart:
             self,
             num_trials,
             percentiles,
-            mean,
+            means,
             levels,
             target_dimensions=[],
             target_mean=[],
@@ -137,9 +137,9 @@ class FanChart:
                                      percentiles[3, :], percentiles[2, :],
                                      color='blue', alpha=25/50)
 
-        mean_line, = self.ax.plot(np.arange(0, self.num_steps), mean,
+        mean_line, = self.ax.plot(np.arange(0, self.num_steps), means,
                                   color='blue')
-        original_mean_line, = self.ax.plot(np.arange(0, self.num_steps), mean,
+        original_mean_line, = self.ax.plot(np.arange(0, self.num_steps), means,
                                            color='black')
         target_mean_line, = self.ax.plot(target_dimensions, target_mean,
                                          color='red')
@@ -152,7 +152,7 @@ class FanChart:
 
         plt.show()
 
-    def update(self, num_selected, percentiles, mean):
+    def update(self, num_selected, percentiles, means):
         self.ax.collections.clear()
         area1 = self.ax.fill_between(self.x, percentiles[5, :],
                                      percentiles[0, :],
@@ -168,7 +168,7 @@ class FanChart:
         self.components[4] = area3
 
         mean_line = self.components[1]
-        mean_line.set_data(self.x, mean)
+        mean_line.set_data(self.x, means)
         counter = self.components[0]
         counter.set_text(str(num_selected) + ' scenarios')
 

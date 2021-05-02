@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from scenarioselector.pivot_dimensions import DantzigTwoPhase
-from scenarioselector.pivot_trials import barrodale_roberts
+from scenarioselector.pivot_variable import DantzigTwoPhase
+from scenarioselector.pivot_scenarios import barrodale_roberts
 
 __all__ = ['PivotRule', 'PivotRuleSlowed']
 

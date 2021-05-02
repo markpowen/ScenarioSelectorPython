@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from scenarioselector.pivot_rules import PivotRule
+from scenarioselector.pivot_rule import PivotRule
 import pandas as pd
 import numpy as np
 
